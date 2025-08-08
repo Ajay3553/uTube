@@ -20,8 +20,10 @@ const asyncHandler = (fn) = async(req, res, next) => { // creating a wrapper fun
 
 
 const asyncHandler = (requestHandler) => {
-    (req, res, next) => {
+    return (req, res, next) => {
         Promise.resolve(requestHandler(req, res, next))
         .catch((e) => next(e))
     }
 }
+
+export {asyncHandler}
