@@ -49,7 +49,7 @@ const userSchema = new Schema(
             required: [true, "Password is required"]
         },
 
-        refreshTokoen: {
+        refreshToken: {
             type: String
         }
     },
@@ -57,7 +57,7 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("save", async function (next){
-    if(this.isModified("password")) this.password = bcrypt.hash(this.password, 10);
+    if(this.isModified("password")) this.password = await bcrypt.hash(this.password, 10);
     next();
 })
 
