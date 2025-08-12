@@ -1,23 +1,27 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
-import apiError from '../utils/apiError.js';
+import { apiError } from '../utils/apiError.js';
 import { User } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { apiResponse } from '../utils/apiResponse.js'
 
 const registerUser = asyncHandler(async (req, res) => {
   const {fullName, email, username, password} = req.body // get user Data from frontend
-  console.log("email", email);
   if([fullName, email, username, password].some((field) => field?.trim() == "")){ //Validation
     throw new apiError(400, "All Fields are Required")
   }
-  const existedUser = User.findOne({ //validation
+  const existedUser = await User.findOne({ //validation
     $or : [{ username }, { email }]
   })
 
   if(existedUser) throw new apiError(409, "User with Email or Username already exist") //validation
   
   const avaterLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+  let coverImageLocalPath;
+  if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
 
   if(!avaterLocalPath) throw new apiError(400, "Avater file is Required") //validation : since Avatar is a required field
   
@@ -26,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const coverImage = await uploadOnCloudinary(coverImageLocalPath); // upload to cloudinary
 
   const user = await User.create({  // create user object - create entry in DB
-    fullname,
+    fullName,
     avatar : avatar.url,
     coverImage : coverImage?.url || "",
     email,

@@ -14,14 +14,14 @@ const userSchema = new Schema(
         },
 
         email: {
-            tyoe: String,
+            type: String,
             required: true,
             unique: true,
             lowercase: true,
             trim: true
         },
         
-        fullname: {
+        fullName: {
             type: String,
             required: true,
             trim: true,
@@ -29,7 +29,7 @@ const userSchema = new Schema(
         },
         
         avatar: {
-            tyoe: String, //cloudinary URL
+            type: String, //cloudinary URL
             required: true
         },
 
