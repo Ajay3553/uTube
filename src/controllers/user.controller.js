@@ -32,7 +32,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if(existedUser) throw new apiError(409, "User with Email or Username already exist") //validation
   
-  const avaterLocalPath = req.files?.avatar[0]?.path;
+  const avatarLocalPath = req.files?.avatar[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
   let coverImageLocalPath;
@@ -40,9 +40,9 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImageLocalPath = req.files.coverImage[0].path;
   }
 
-  if(!avaterLocalPath) throw new apiError(400, "Avater file is Required") //validation : since Avatar is a required field
+  if(!avatarLocalPath) throw new apiError(400, "Avater file is Required") //validation : since Avatar is a required field
   
-  const avatar = await uploadOnCloudinary(avaterLocalPath); // upload to cloudinary
+  const avatar = await uploadOnCloudinary(avatarLocalPath); // upload to cloudinary
   if(!avatar) throw apiError(400, "Avatar file is Required") // validation
   const coverImage = await uploadOnCloudinary(coverImageLocalPath); // upload to cloudinary
 
@@ -68,7 +68,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler (async (req, res) => {
   const {email, username, password} = req.body;
-  if(!username || !email) throw new apiError(400, "username or email is required");
+  if(!(username || email)) throw new apiError(400, "username or email is required");
   const user = await User.findOne({$or : [{username, email}]});
   if(!user) throw new apiError(404, "User does not Exist");
   
