@@ -26,26 +26,23 @@ Backend : Node.js, Express.js, MongoDB
 
 Tooling: Vite, ESLint, Prettier, GitHub Actions
 
-🚀 Getting Started
+## 🚀 Getting Started
 
-Clone the repo
+Follow these steps to set up the project locally:
 
+```bash
+# 1. Clone the repository
 git clone https://github.com/Ajay3553/uTube.git
 cd uTube
 
-
-Install dependencies
-
+# 2. Install dependencies
 npm install
 
+# 3. Set up environment variables
+#    Create a .env file based on .env.sample and add your API key
+cp .env.sample .env
 
-Set up environment variables
-
-Create a .env file based on .env.sample:
-
-VITE_API_KEY=your_api_key_here
-
-
-Start the development server
-
+# 4. Start the development server
 npm run dev
+```
+
