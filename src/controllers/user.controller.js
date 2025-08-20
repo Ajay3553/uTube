@@ -3,12 +3,22 @@ import { apiError } from '../utils/apiError.js';
 import { User } from '../models/user.model.js';
 import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { apiResponse } from '../utils/apiResponse.js';
+import {v2 as cloudinary} from 'cloudinary';
 import jwt from 'jsonwebtoken';
 
 const options = {
     httpOnly: true,
     secure: true
   }
+
+const deleteFromCloudinary = asyncHandler(async (publicId) => {
+  try{
+    await cloudinary.uploader.destroy(publicId);
+  }
+  catch(e){
+    throw new apiError(500, "Something went wrong while deleteing old image", e.message)
+  }
+})
 
 const generateAccessAndRefreshTokens = async(userId) => {
   try{
@@ -186,7 +196,7 @@ const changeCurrentPassword = asyncHandler( async(req, res) => {
 const getCurrectUser = asyncHandler( async(req, res) => {
   return res
   .status(200)
-  .json(200, req.user, "fetched Current User Successfully")
+  .json(new apiResponse(200, req.user, "fetched Current User Successfully"))
 })
 
 const updateAccountDetails = asyncHandler( async(req, res) => {
@@ -195,7 +205,7 @@ const updateAccountDetails = asyncHandler( async(req, res) => {
     throw new apiError(400, "All fields are required")
   }
 
-  const updatedUser = User.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set:{
@@ -221,12 +231,17 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new apiError(400, "Avatar file is required")
   }
 
+  const userOld = await User.findById(req.user?._id);
+  if(userOld?.avatar){
+    const oldAvaterId = userOld.avatar.split('/').pop().split('.')[0];
+    await deleteFromCloudinary(oldAvaterId);
+  }
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   if(!avatar.url){
     throw new apiError(400, "Error occured while uploading avatar")
   }
 
-  await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set:{
@@ -253,6 +268,13 @@ const upadateUserCoverImage = asyncHandler( async (req, res) => {
   const coverImageLocalPath = req.file?.path
   if(!coverImageLocalPath){
     throw new apiError(400, "Cover Image not found")
+  }
+
+  const userOld = await User.findById(req.user?._id);
+
+  if(userOld?.coverImage){
+    const oldCoverImageId = userOld.coverImage.split('/').pop().split('.')[0];
+    await deleteFromCloudinary(oldCoverImageId)
   }
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
