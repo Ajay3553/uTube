@@ -34,7 +34,7 @@ router.route("/avatar").patch(
 )
 router.route("/cover-image").patch(
     verifyJWT,
-    upload.single("/coverImage"),
+    upload.single("coverImage"),
     upadateUserCoverImage
 )
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile) // since data is coming from params now c/: username will display the username of user in URL
