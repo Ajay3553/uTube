@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import {Video} from "../models/video.model.js"
-import {apiError, ApiError} from "../utils/ApiError.js"
-import {apiResponse, ApiResponse} from "../utils/ApiResponse.js"
+import { apiError } from "../utils/ApiError.js"
+import { apiResponse } from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 

@@ -2,13 +2,13 @@ import mongoose from "mongoose"
 import {Video} from "../models/video.model.js"
 import {Subscription} from "../models/subscription.model.js"
 import {Like} from "../models/like.model.js"
-import {ApiError} from "../utils/ApiError.js"
-import {ApiResponse} from "../utils/ApiResponse.js"
+import {apiError} from "../utils/ApiError.js"
+import {apiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const getChannelStats = asyncHandler(async (req, res) => {
     if(!req.user){
-        throw new ApiError(401, "Authentication required");
+        throw new apiError(401, "Authentication required");
     }
 
     const channelId = req.user._id;
@@ -74,7 +74,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
     };
 
     return res.status(200).json(
-        new ApiResponse(
+        new apiResponse(
             200,
             channelStats,
             "Channel stats fetched successfully"
@@ -84,14 +84,14 @@ const getChannelStats = asyncHandler(async (req, res) => {
 
 const getChannelVideos = asyncHandler(async (req, res) => {
     if(!req.user){
-        throw new ApiError(401, "Authentication required");
+        throw new apiError(401, "Authentication required");
     }
 
     const { page = 1, limit = 10, sortBy = 'createdAt', sortType = 'desc' } = req.query;
     const channelId = req.user._id;
 
     if(page < 1 || limit < 1 || limit > 50){
-        throw new ApiError(400, "Invalid pagination parameters");
+        throw new apiError(400, "Invalid pagination parameters");
     }
 
     const skip = (page - 1) * limit;
@@ -175,7 +175,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     const totalPages = Math.ceil(totalVideos / limit);
 
     return res.status(200).json(
-        new ApiResponse(
+        new apiResponse(
             200,
             {
                 videos,

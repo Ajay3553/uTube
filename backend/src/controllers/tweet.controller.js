@@ -2,11 +2,11 @@ import mongoose from 'mongoose'
 import {Tweet} from '../models/tweet.model.js'
 import {User} from '../models/user.model.js'
 import {asyncHandler} from '../utils/asyncHandler.js'
-import { apiError } from '../utils/apiError.js'
-import { apiResponse } from '../utils/apiResponse.js'
-
+import { apiError } from '../utils/ApiError.js'
+import { apiResponse } from '../utils/ApiResponse.js'
 const createTweet = asyncHandler(async (req, res) => {
-    const {username, avatar, fullName, content} = req.body;
+    const {content} = req.body;
+    
     if(!content || !content.trim()){
         throw new apiError(400, "Content is Required")
     }
@@ -23,7 +23,7 @@ const createTweet = asyncHandler(async (req, res) => {
 
     return res.status(201).json(
         new apiResponse(
-            200,
+            201,
             tweet,
             "Tweet Successfully Created"
         )
@@ -32,15 +32,18 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweet = asyncHandler(async (req, res) =>{
     const {userId} = req.params;
-    const {page = 1, limit = 10} = req.query
-    const validUserId = await mongoose.isValidObjectId(userId);
+    const {page = 1, limit = 10} = req.query;
+    
+    const validUserId = mongoose.isValidObjectId(userId);
     if(!validUserId){
         throw new apiError(400, "Invalid user ID")
     }
+    
     const user = await User.findById(userId).select("username fullName avatar");
     if(!user){
         throw new apiError(404, "User not found");
     }
+    
     const skip = (page - 1)*limit;
     const tweets = await Tweet.aggregate([
         {
@@ -76,13 +79,15 @@ const getUserTweet = asyncHandler(async (req, res) =>{
                         $ifNull:['$comments', []]
                     }
                 },
-                isLikedByCurrentUser: req.user?{ $in: [new mongoose.Types.ObjectId(req.user._id), '$likes'] } : false
+                isLikedByCurrentUser: req.user ? 
+                    { $in: [new mongoose.Types.ObjectId(req.user._id), '$likes'] } : false
             }
         },
         {$sort: {createdAt: -1}},
         {$skip: skip},
         {$limit: parseInt(limit)}
-    ])
+    ]);
+    
     const totalTweets = await Tweet.countDocuments({author: userId});
 
     return res.status(200).json(
@@ -102,11 +107,11 @@ const getUserTweet = asyncHandler(async (req, res) =>{
     );
 })
 
-
-const updateTweet = asyncHandler( async (req, res) => {
+const updateTweet = asyncHandler(async (req, res) => {
     const {id: tweetId} = req.params;
     const {content} = req.body;
-    const validTweetId = await mongoose.isValidObjectId(tweetId);
+
+    const validTweetId = mongoose.isValidObjectId(tweetId);
 
     if (!req.user) {
         throw new apiError(401, "Authentication required");
@@ -142,8 +147,9 @@ const updateTweet = asyncHandler( async (req, res) => {
     )
 })
 
-const deleteTweet = asyncHandler( async (req, res) => {
+const deleteTweet = asyncHandler(async (req, res) => {
     const {id: tweetId} = req.params;
+    
     const validTweetId = mongoose.isValidObjectId(tweetId);
     if(!validTweetId){
         throw new apiError(400, "Invalid Tweet");
@@ -159,7 +165,7 @@ const deleteTweet = asyncHandler( async (req, res) => {
     }
 
     if(tweet.author.toString() !== req.user._id.toString()){
-        throw new apiError(403, "You can Delete your own Tweets")
+        throw new apiError(403, "You can only delete your own Tweets")
     }
 
     const deletedTweet = await Tweet.findByIdAndDelete(tweetId);
@@ -179,7 +185,6 @@ const deleteTweet = asyncHandler( async (req, res) => {
         )
     );
 })
-
 
 export {
     createTweet,

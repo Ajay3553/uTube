@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import {verifyJWT} from '../middlewares/auth.middleware.js'
-import { createTweet, deleteTweet, getUserTweet, updateTweet } from '../controllers/tweets.controller.js';
+import { createTweet, deleteTweet, getUserTweet, updateTweet } from '../controllers/tweet.controller.js';
 
 const router = Router();
 
